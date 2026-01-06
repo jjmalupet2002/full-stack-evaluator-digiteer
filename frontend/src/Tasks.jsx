@@ -1,22 +1,28 @@
-import { useEffect, useState } from 'react';
-import api from "./api/axios"
+import { useTasks } from './hooks/useTasks';
+import TaskForm from './components/TaskForm';
 
 function Tasks() {
-  const [tasks, setTasks] = useState([]);
+  const { tasks, status, error, toggle, remove } = useTasks();
 
-  useEffect(() => {
-    api.get('/tasks')
-      .then(res => setTasks(res.data))
-      .catch(err => console.error(err));
-  }, []);
+  if (status === 'loading') return <div>Loading tasks...</div>;
+  if (status === 'failed') return <div>Error: {error}</div>;
 
   return (
-    <div>
+    <div className="tasks-container">
       <h2>Tasks</h2>
-      <ul>
+      <TaskForm />
+      <ul className="task-list">
         {tasks.map(task => (
-          <li key={task.id}>
-            {task.title} {task.isDone ? '✅' : '❌'}
+          <li key={task.id} className="task-item">
+            <span
+              onClick={() => toggle(task)}
+              style={{ textDecoration: task.isDone ? 'line-through' : 'none', cursor: 'pointer' }}
+            >
+              {task.title} {task.isDone ? '✅' : '⬜'}
+            </span>
+            <button onClick={() => remove(task.id)} style={{ marginLeft: '10px' }}>
+              Start Deleting
+            </button>
           </li>
         ))}
       </ul>
